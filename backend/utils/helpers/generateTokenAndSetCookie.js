@@ -17,6 +17,12 @@ const generateTokenAndSetCookie = async(userId, res) => {
 };
 
 
+// some information about workflow :
+
+//Where the Token and Cookie Are
+// In the Cookie:
+// The token is stored in the user's browser as an HTTP-only cookie named accesstoken.
+//  Because it's marked as httpOnly, it cannot be accessed via JavaScript, which helps protect against XSS attacks.
 
 
 export default generateTokenAndSetCookie

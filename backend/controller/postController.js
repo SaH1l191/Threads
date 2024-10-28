@@ -4,21 +4,21 @@ import { v2 as cloudinary } from "cloudinary";
 
 export const createPost = async (req, res) => {
    try{
-        let {postedBy , text} = req.body;
+        let {postedBy , postText} = req.body;
         let { img } = req.body;
 
-        if(!text || !postedBy) return res.status(400).json({message: "Please enter all fields"})
+        if(!postText || !postedBy) return res.status(400).json({error: "Please enter all fields"})
         
         const user = await User.findById(postedBy)
 
-        if(!user) return res.status(404).json({message: "User not found"})
+        if(!user) return res.status(404).json({error: "User not found"})
         
         if(user._id.toString() !== req.user._id.toString()){
             return res.status(401).json({ error: "Unauthorized to create post" });
         }
         const maxlength = 500
 
-        if(text.length > maxlength){
+        if(postText.length > maxlength){
             return res.status(400).json({ error: `Text must be less than ${maxLength} characters` });
         }
 
@@ -26,7 +26,7 @@ export const createPost = async (req, res) => {
 			const uploadedResponse = await cloudinary.uploader.upload(img);
 			img = uploadedResponse.secure_url;
 		}
-        const newPost = new Post({ postedBy, text, img });
+        const newPost = new Post({ postedBy, postText, img });
         await newPost.save()
 
         res.status(201).json(newPost);
@@ -72,7 +72,7 @@ export const likeUnlikePost =  async (req, res) => {
         const post = await Post.findById(postId)
 
         if(!post){
-            return res.status(404).json({ message: "Post not found" })
+            return res.status(404).json({ error: "Post not found" })
         }
 
         const userLikedPost = post.likes.includes(userId)
@@ -130,7 +130,7 @@ export const getFeedPosts =  async (req, res) => {
         const user = await User.findById(userId)
 
         if(!user){
-            return res.status(404).json({ message: "User not found" })
+            return res.status(404).json({ error: "User not found" })
         }
         const following = user.following
 
@@ -149,7 +149,7 @@ export const getPost=  async (req, res) => {
         const post = await Post.findById(req.params.id)
 
         if(!post){
-            return res.status(404).json({ message: "Post not found" })
+            return res.status(404).json({ error: "Post not found" })
         }
         res.status(200).json(post)
     }
@@ -164,7 +164,7 @@ export const getUserPosts =  async (req, res) => {
         const {username} = req.params
         const user = await User.findOne({ username })
         if(!user){
-            return res.status(404).json({ message: "User not found" })
+            return res.status(404).json({ error: "User not found" })
         }
         const posts = await Post.find({postedBy : user._id}).sort({createdAt : -1})
 

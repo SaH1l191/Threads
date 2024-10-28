@@ -19,7 +19,7 @@ export const signUpUser = async(req,res)=>{
         // const user = userByEmail || userByUsername;
 
         if(user){
-            return res.status(400).json({message : "Email or username already exists"})
+            return res.status(400).json({error : "Email or username already exists"})
         }
         
         const salt = await bcrypt.genSalt(10); // generate a random string to be used as salt for the password hash function (see below)
@@ -40,7 +40,9 @@ export const signUpUser = async(req,res)=>{
                 _id : newUser._id,
                 name : newUser.name,
                 email : newUser.email,
-                username : newUser.username
+                username : newUser.username,
+                bio: newUser.bio,
+				profilePic: newUser.profilePic
             })
         }else{
             return res.status(400).json({message : "Something went wrong while signing up the user"}) 
@@ -49,7 +51,7 @@ export const signUpUser = async(req,res)=>{
     }
     catch(error){
         res.status(500).json({
-            message : error.message
+            error : error.message
         })
     }
 }
@@ -69,14 +71,16 @@ export const loginUser = async (req, res) => {
             _id  : user._id,
             name : user.name,
             email : user.email,
-            username : user.username
+            username : user.username,
+            bio: user.bio,
+			profilePic: user.profilePic
         }
         )
 
     }
     catch(error){
         res.status(500).json({
-            message : error.message
+            error : error.message
         })
     }
 }
@@ -95,7 +99,7 @@ export const logoutUser = async (req, res) => {
     }
     catch(error){
         res.status(500).json({
-            message : error.message
+            error : error.message
         })
     }
 }
@@ -108,10 +112,10 @@ export const followUnFollowUser = async (req, res) => {
         const currentUser = await User.findById(req.user._id)
 
         if(id === req.user._id.toString()){
-            return res.status(400).json({message : "You cannot follow yourself"})
+            return res.status(400).json({error : "You cannot follow yourself"})
         }
         if(!userToModify || !currentUser ){
-            return res.status(400).json({message : "Something went wrong while following the user"})
+            return res.status(400).json({error : "Something went wrong while following the user"})
         }
         const isFollowing = currentUser.following.includes(id);
 
@@ -222,6 +226,7 @@ export const updateUser = async (req, res) => {
         //updating all the posts of the updated user details 
 
         // await Post.updateMany({})
+        user.password = null;
 
         res.status(200).json(user);
     }
